@@ -33,13 +33,11 @@ public class LearningSession {
 	}
 	
 	public List<FrequencyTable> calculateFrequencyTables(Dataset ds, String dataSplit) {
-		OneR oneR = new OneR(ds);
-		return oneR.getFrequencyTables(ds, dataSplit);
+		return OneR.getFrequencyTables(ds, dataSplit);
 	}
 	
 	public Frequency calculateFrequencyHighCoverageLowError(Dataset ds, String dataSplit) {
-		OneR oneR = new OneR(ds);
-		return oneR.getFrequencyHighCoverageLowError(ds, dataSplit);
+		return OneR.getFrequencyHighCoverageLowError(ds, dataSplit);
 		
 	}
 

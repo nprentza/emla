@@ -8,16 +8,7 @@ import emla.dbcomponent.DatasetAbstract;
 
 public class OneR {
 
-protected DatasetAbstract data;
-	
-	public OneR(DatasetAbstract ds) {
-		this.data = ds;
-		
-		DbAccess.initiateConnection();
-		DbAccess.createDbTable(ds);
-	}
-
-	public List<FrequencyTable> getFrequencyTables(DatasetAbstract ds, String dataSplit){
+	public static List<FrequencyTable> getFrequencyTables(DatasetAbstract ds, String dataSplit){
 		List<FrequencyTable> freuencyTables = new ArrayList<>();
 		
 		for (String predictor : ds.getPredictors()) {
@@ -29,9 +20,9 @@ protected DatasetAbstract data;
 		return freuencyTables;
 	}
 	
-	public Frequency getFrequencyHighCoverageLowError(DatasetAbstract ds, String dataSplit) {
+	public static Frequency getFrequencyHighCoverageLowError(DatasetAbstract ds, String dataSplit) {
 		
-		List<FrequencyTable> freuencyTables = this.getFrequencyTables(ds, dataSplit);
+		List<FrequencyTable> freuencyTables = getFrequencyTables(ds, dataSplit);
 		
 		Frequency f = freuencyTables.get(0).selectFrequencyHighCoverageLowError();
 		

@@ -16,26 +16,24 @@ import emla.learning.LearningSession;
 
 public class Frequency {
 	
-	List<Pair<String,Object>> predictorValues;	//	i.e. (outlook, sunny) or {(outlook,sunny),(temp,cool)}
+	Pair<String,Object> predictorValue;	//	i.e. (outlook, sunny)
 	double predictorValueCoverage;
 	Map<String, Integer> frequencies;	//	for each target value (i.e. play-golf {yes,no}), the number of instances that satisfy this condition
 	String bestTargetValue;
 	double bestTargetError;
 	int allFrequencyIsntances;
 	double bestFrequencyAssessment;
-	
-	
-	public Frequency(List<Pair<String,Object>> predictorValues) {
-		this.predictorValues = predictorValues;
-		this.frequencies = new HashMap<>();
-	}
-	
+
+
 	public Frequency(String predictor, String value) {
-		predictorValues = new ArrayList<>();
-		predictorValues.add(Pair.of(predictor,value));
+		predictorValue = Pair.of(predictor,value);
 		this.frequencies = new HashMap<>();
 	}
-	
+
+	public Pair<String,Object> getPredictorValues(){
+		return this.predictorValue;
+	}
+
 	public void setCoverage(int allInstances) {
 		allFrequencyIsntances = frequencies.values().stream().mapToInt(d-> d).sum();
 		this.predictorValueCoverage = (double) allFrequencyIsntances /(double) allInstances;
@@ -65,7 +63,7 @@ public class Frequency {
 	public Map<String, Integer> getFrequencies(){
 		return this.frequencies;
 	}
-	
+
 	public double getBestTargetError() {return this.bestTargetError;}
 	public String getBestTargetValue() {return this.bestTargetValue;}
 	
@@ -86,10 +84,8 @@ public class Frequency {
 	private String predictorValuesToString() {
 		String condition="";
 		
-		for (Pair<String,Object> p : predictorValues) {
-			condition += condition.length()==0 ?  p.getLeft() + "=" + p.getRight() :  "," + p.getLeft() + "=" + p.getRight();
-		}
-		
+		condition += condition.length()==0 ?  predictorValue.getLeft() + "=" + predictorValue.getRight() :  "," + predictorValue.getLeft() + "=" + predictorValue.getRight();
+
 		return condition;
 			
 	}

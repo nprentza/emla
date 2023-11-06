@@ -74,11 +74,21 @@ private static final Logger logger = LogManager.getLogger(DbAccess.class);
 		return success;
 	}
 	
-	public static FrequencyTable getFrequencies(String predictor, String targetVariable, List<String> targetValues, String tblName, String datasplit){
+	public static FrequencyTable getFrequencies(String predictor, String targetVariable, List<String> targetValues, String tblName,
+												String datasplit, List<Integer> caseIDs){
 		FrequencyTable freqTable = new FrequencyTable(predictor, targetValues);
+
+		String inSql=null;
+		if (caseIDs!=null){
+			inSql = "caseID IN (";
+			for (Integer caseId : caseIDs){
+				inSql += caseId + ",";
+			}
+			inSql = inSql.substring(0, inSql.length()-1) + ")";
+		}
 		
 		String sqlString = "SELECT " + predictor + ", " + targetVariable + ", count(*) as instances FROM " + tblName 
-				+ " WHERE datasplit='" + datasplit + "'"
+				+ " WHERE datasplit='" + datasplit + "'" + (inSql!=null ? " AND " + inSql : "")
 				+ " GROUP BY " + predictor + ", " + targetVariable 
 				+ " ORDER BY " + predictor + ";";
 	
@@ -92,9 +102,14 @@ private static final Logger logger = LogManager.getLogger(DbAccess.class);
 				while (rs.next()) {
 					if (!rs.getString(1).equals(tmpPredictorValue)) {
 						freqTable.addFrequency(f);
-						f = new Frequency(predictor, rs.getString(1)); tmpPredictorValue=rs.getString(1);
+						f = new Frequency(predictor, rs.getString(1));
+						tmpPredictorValue = rs.getString(1);
 					}
 					f.addFrequency(rs.getString(2), rs.getInt(3));
+				}
+				// case rs contains a single recordset:
+				if (freqTable.isFrequenciesEmpty()){
+					freqTable.addFrequency(f);
 				}
 			}
 			stmt.close();

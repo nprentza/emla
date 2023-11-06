@@ -15,10 +15,12 @@ public class FrequencyTable {
 		this.frequencies = new ArrayList<>();
 	}
 
+	public String getPredictor(){return this.predictor;}
+
 	public void addFrequency(Frequency f) {
 		this.frequencies.add(f);
 	}
-
+	public boolean isFrequenciesEmpty(){return this.frequencies.isEmpty();}
 	
 	public void updateFrequencies(int allInstances) {
 		for (Frequency f : frequencies) {

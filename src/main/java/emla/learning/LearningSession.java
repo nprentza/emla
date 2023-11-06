@@ -32,13 +32,16 @@ public class LearningSession {
 		
 	}
 	
-	public List<FrequencyTable> calculateFrequencyTables(Dataset ds, String dataSplit) {
-		return OneR.getFrequencyTables(ds, dataSplit);
+	public List<FrequencyTable> calculateFrequencyTables(Dataset ds, String dataSplit, List<Integer> caseIDs) {
+		return OneR.getFrequencyTables(ds, dataSplit,caseIDs);
 	}
 	
 	public Frequency calculateFrequencyHighCoverageLowError(Dataset ds, String dataSplit) {
 		return OneR.getFrequencyHighCoverageLowError(ds, dataSplit);
-		
+	}
+
+	public Frequency calculateFrequencyHighCoverageLowError(List<FrequencyTable> frequencyTables) {
+		return OneR.getFrequencyHighCoverageLowError(frequencyTables);
 	}
 
 	public Dataset copyData(Dataset td, List<Integer> caseIDs) {

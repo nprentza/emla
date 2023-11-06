@@ -1,5 +1,6 @@
 package emla.dbcomponent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 
 import tech.tablesaw.api.ColumnType;
 import tech.tablesaw.api.IntColumn;
+import tech.tablesaw.api.Row;
 import tech.tablesaw.api.StringColumn;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.selection.Selection;
@@ -40,12 +42,13 @@ public abstract class DatasetAbstract {
 		initDataset(that.dsFilepath, that.datasetName, that.targetFeature);
 		
 		// restrict data to record in caseIDs
-		Table dsTable_ = this.dsTable.emptyCopy();
+		List<Row> caseIDRows = new ArrayList<>();
 		caseIDs.forEach(caseId ->{
 			Selection s = ((IntColumn) dsTable.column("caseID")).isEqualTo(caseId);
-			if (dsTable.where(s).rowCount()==1) {dsTable_.append(dsTable.where(s).row(0));} 
+			if (dsTable.where(s).rowCount()==1) {caseIDRows.add(dsTable.where(s).row(0));}
 		});
-		this.dsTable = dsTable_;
+		this.dsTable = this.dsTable.dropRange(dsTable.rowCount());
+		caseIDRows.forEach(row -> dsTable.append(row));
 	}
 	
 	public DatasetAbstract(String dsFilepath, String dsName, String targetFeature) {

@@ -12,7 +12,7 @@ At the moment, the repo includes the `oner` library that learns single condition
 
 ```xml
     <dependency>
-        <groupId>emla.org</groupId>
+        <groupId>org.emla</groupId>
         <artifactId>emla</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </dependency>

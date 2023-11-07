@@ -1,10 +1,10 @@
-package emla.learning.oner;
+package org.emla.learning;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import emla.dbcomponent.DbAccess;
-import emla.dbcomponent.DatasetAbstract;
+import org.emla.dbcomponent.DbAccess;
+import org.emla.dbcomponent.DatasetAbstract;
 
 public class OneR {
 

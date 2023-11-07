@@ -2,17 +2,13 @@
  * Frequency class currently holds a condition that supports only the "equality" operator
  * 	
  */
-package emla.learning.oner;
+package org.emla.learning;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
-
-import emla.learning.LearningSession;
 
 public class Frequency {
 	

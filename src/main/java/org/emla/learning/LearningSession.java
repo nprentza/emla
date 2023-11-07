@@ -1,13 +1,10 @@
-package emla.learning;
+package org.emla.learning;
+
+import org.emla.dbcomponent.Dataset;
+import org.emla.dbcomponent.DbAccess;
 
 import java.text.DecimalFormat;
 import java.util.List;
-
-import emla.dbcomponent.DbAccess;
-import emla.dbcomponent.Dataset;
-import emla.learning.oner.Frequency;
-import emla.learning.oner.FrequencyTable;
-import emla.learning.oner.OneR;
 
 public class LearningSession {
 

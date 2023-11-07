@@ -1,4 +1,4 @@
-package emla.learning.oner;
+package org.emla.learning;
 
 import java.util.ArrayList;
 import java.util.List;

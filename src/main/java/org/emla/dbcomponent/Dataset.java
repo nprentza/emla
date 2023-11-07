@@ -1,4 +1,4 @@
-package emla.dbcomponent;
+package org.emla.dbcomponent;
 
 import java.util.List;
 

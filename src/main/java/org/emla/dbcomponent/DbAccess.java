@@ -1,4 +1,4 @@
-package emla.dbcomponent;
+package org.emla.dbcomponent;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,8 +10,8 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import emla.learning.oner.Frequency;
-import emla.learning.oner.FrequencyTable;
+import org.emla.learning.Frequency;
+import org.emla.learning.FrequencyTable;
 import tech.tablesaw.api.ColumnType;
 
 public class DbAccess {

@@ -1,13 +1,11 @@
-package emla.learning;
+package org.emla.learning;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import emla.dbcomponent.Dataset;
-import emla.learning.oner.Frequency;
-import emla.learning.oner.FrequencyTable;
+import org.emla.dbcomponent.Dataset;
 
 public class TestOneR {
 

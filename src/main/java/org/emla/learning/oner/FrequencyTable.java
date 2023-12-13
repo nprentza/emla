@@ -1,4 +1,4 @@
-package org.emla.learning;
+package org.emla.learning.oner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class FrequencyTable {
 	
 	public void updateFrequencies(int allInstances) {
 		for (Frequency f : frequencies) {
-			f.setCoverage(allInstances); f.updateFrequency();
+			f.updateFrequency(allInstances);
 		}
 	}
 

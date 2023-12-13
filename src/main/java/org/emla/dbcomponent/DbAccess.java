@@ -10,8 +10,9 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.emla.learning.Frequency;
-import org.emla.learning.FrequencyTable;
+import org.emla.learning.LearningUtils;
+import org.emla.learning.oner.Frequency;
+import org.emla.learning.oner.FrequencyTable;
 import tech.tablesaw.api.ColumnType;
 
 public class DbAccess {
@@ -97,12 +98,12 @@ private static final Logger logger = LogManager.getLogger(DbAccess.class);
 			Statement stmt=conn.createStatement();
 			ResultSet rs = stmt.executeQuery(sqlString);
 			if (rs.next()) {
-				f = new Frequency(predictor, rs.getString(1)); tmpPredictorValue=rs.getString(1);
+				f = new Frequency(predictor, LearningUtils.Operator.EQUALS, rs.getString(1)); tmpPredictorValue=rs.getString(1);
 				f.addFrequency(rs.getString(2), rs.getInt(3));
 				while (rs.next()) {
 					if (!rs.getString(1).equals(tmpPredictorValue)) {
 						freqTable.addFrequency(f);
-						f = new Frequency(predictor, rs.getString(1));
+						f = new Frequency(predictor, LearningUtils.Operator.EQUALS, rs.getString(1));
 						tmpPredictorValue = rs.getString(1);
 					}
 					f.addFrequency(rs.getString(2), rs.getInt(3));
@@ -141,7 +142,7 @@ private static final Logger logger = LogManager.getLogger(DbAccess.class);
 
 	private static Frequency getFrequency(String sqlString, String predictor, String predictorValue) throws SQLException{
 		
-		Frequency f = new Frequency(predictor, predictorValue);
+		Frequency f = new Frequency(predictor, LearningUtils.Operator.EQUALS, predictorValue);
 		
 		Statement stmt=conn.createStatement();
 		ResultSet rs = stmt.executeQuery(sqlString);

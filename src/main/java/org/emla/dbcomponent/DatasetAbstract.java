@@ -65,13 +65,6 @@ public abstract class DatasetAbstract {
 		testSplit = testPercSplit;
 		initDataset(dsFilepath, dsName, targetFeature);
 	}
-	
-	public DatasetAbstract(String dsFilepath, String dsName, String targetFeature, double trainPercSplit, double testPercSplit, List<String> initializationFeatures) {
-		trainSplit = trainPercSplit;
-		testSplit = testPercSplit;
-		this.initializationFeatures=initializationFeatures;
-		initDataset(dsFilepath, dsName, targetFeature);
-	}
 
 
 	private void initDataset(String dsFilepath, String dsName, String targetFeature) {

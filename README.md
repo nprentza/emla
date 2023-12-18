@@ -5,7 +5,7 @@ a general Explainable Machine Learning Framework and Methodology based on Argume
 For more information please refer to paper [Explainable Machine Learning via Argumentation](https://link.springer.com/chapter/10.1007/978-3-031-44070-0_19).
 
 At the moment, the repo includes the `oner` library that learns single condition rules from a given dataset using the concepts of 
-"One Rule" classification algorithm [OneR](https://www.saedsayad.com/oner.htm). The library currently supports datasets with categorical features.
+"One Rule" classification algorithm [OneR](https://www.saedsayad.com/oner.htm). The library currently supports datasets with categorical and numerical features.
 
 ## Usage
 - Add `emla` module as dependency to your project

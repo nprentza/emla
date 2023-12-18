@@ -8,6 +8,7 @@ import org.emla.learning.oner.FrequencyTable;
 import org.junit.jupiter.api.Test;
 
 import org.emla.dbcomponent.Dataset;
+import tech.tablesaw.api.ColumnType;
 
 public class TestOneR {
 
@@ -44,5 +45,10 @@ public class TestOneR {
 		LearningSession emlaSession = new LearningSession(ds,"agents");
 		List<FrequencyTable> frequencyTables = emlaSession.calculateFrequencyTables(ds, "train",null);
 		frequencyTables.forEach(ft -> System.out.println(ft.toString()));
+
+		Frequency fHighCovLowError_Numeric = emlaSession.calculateFrequencyHighCoverageLowError(frequencyTables, ColumnType.INTEGER);
+		if (fHighCovLowError_Numeric!=null){
+			System.out.println("** fHighCovLowError_Numeric **\n    " + fHighCovLowError_Numeric.toString());
+		}
 	}
 }

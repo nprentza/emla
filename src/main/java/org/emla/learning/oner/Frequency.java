@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.emla.learning.LearningSession;
@@ -26,7 +27,6 @@ public class Frequency {
 	double majorityTargetClassError;
 	double bestFrequencyAssessment;
 
-	// TODO remove this
 	public Frequency(String featureName, LearningUtils.Operator operator, String value) {
 		//predictorValue = Pair.of(predictor,value);
 		this.featureName = featureName;
@@ -45,11 +45,25 @@ public class Frequency {
 		this.operatorValue.add(Pair.of(operator,value));
 	}
 
+	public List<String> getFrequencyConditions(){
+		return this.operatorValue.stream()
+				.map(operatorValue -> this.featureName + " " + operatorValue.getLeft().toString() + " " + operatorValue.getRight().toString())
+				.collect(Collectors.toList());
+	}
+
+	public List<Pair<LearningUtils.Operator, Object>>  getOperatorValuePairs(){
+		return this.operatorValue;
+	}
+
+	public String getFeatureName(){return this.featureName;}
+
+	public String getMajorityTargetClass(){return this.majorityTargetClass;}
+
 	/*public Pair<String,Object> getPredictorValues(){
 		return this.predictorValue;
 	}*/
 
-	public void setCoverage(int allInstances) {
+	private void setCoverage(int allInstances) {
 		this.coverage = (double) dataPointsByClass.values().stream().mapToInt(d-> d).sum() /(double) allInstances;
 	}
 	
@@ -81,7 +95,8 @@ public class Frequency {
 	
 	public String toString() {
 		
-		String str="\n>> for " + predictorValuesToString() + " (Coverage= " + LearningSession.df.format(coverage)  + " ) "
+		String str="\n>> " + this.getFrequencyConditions().stream().collect(Collectors.joining(", ")) //+ featureName + predictorValuesToString()
+				+ " (Coverage= " + LearningSession.df.format(coverage)  + " ) "
 		+ " (Best target value = " + this.majorityTargetClass + ", with error=" +  LearningSession.df.format(this.majorityTargetClassError) +  " ) " + " ) :\n";
 
 		for (Entry<String, Integer> entry : dataPointsByClass.entrySet()) {

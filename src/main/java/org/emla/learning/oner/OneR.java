@@ -1,8 +1,10 @@
 package org.emla.learning.oner;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.emla.dbcomponent.Dataset;
 import org.emla.dbcomponent.DbAccess;
@@ -25,9 +27,6 @@ public class OneR {
 			else if (ds.getDsTable().column(predictor).type()== ColumnType.DOUBLE || ds.getDsTable().column(predictor).type()== ColumnType.INTEGER){
 				freuencyTables.add(frequencyTableNumericalFeature(predictor,ds,dataSplit,caseIDs));
 			}
-			/*FrequencyTable ft = DbAccess.getFrequencies(predictor, ds.getTargetFeature(), ds.getUniqueTargetValues(), ds.getDatasetName(), dataSplit, caseIDs);
-			ft.updateFrequencies(caseIDs!=null ? caseIDs.size() : ds.getDataSplit(dataSplit).rowCount());
-			freuencyTables.add(ft);*/
 		}
 		return freuencyTables;
 	}
@@ -44,7 +43,7 @@ public class OneR {
 		Table data = dataSplit!=null ? dsFiltered.getDataSplit(dataSplit) : dsFiltered.getDsTable();
 		data = data.sortAscendingOn(featureName);
 		List<Double> splitPoints = LearningUtils.numericalSplitPoints(data,featureName,ds.getTargetFeature());
-		FrequencyTable freqTable = new FrequencyTable(featureName, ds.getUniqueTargetValues());
+		FrequencyTable freqTable = new FrequencyTable(featureName, ds.getDsTable().column(featureName).type(), ds.getUniqueTargetValues());
 		 /*
             for each split point i:
                 calculate frequencies for the range [split-point(i-1), split-point(i))
@@ -53,7 +52,7 @@ public class OneR {
 		Table dataSelection = null;
 		if (splitPoints.size()==0){	// all datapoints of the same class
 			lowValue = data.row(0).getNumber(featureName);
-			highValue = data.row(data.rowCount()).getNumber(featureName);
+			highValue = data.row(data.rowCount()-1).getNumber(featureName);
 			dataSelection  = filterSelection(data, featureName, lowValue, highValue,true,true);
 			freqTable.addFrequency(numericalFrequency(featureName,
 					LearningUtils.getDataPointsByClass(dataSelection,ds.getTargetFeature(),ds.getUniqueTargetValues()),
@@ -83,16 +82,14 @@ public class OneR {
 
 	private static Table filterSelection(Table data, String featureName, Double lowValue, Double highValue, boolean leftValueIncluded, boolean rightValueIncluded){
 		Table dataFiltered=null;
+		// leftValueIncluded always true
+		if (!rightValueIncluded) {highValue++;}
 		if (data.column(featureName).type()==ColumnType.INTEGER){
 			IntColumn intColumn = data.intColumn(featureName);
-			dataFiltered = data.
-					where(leftValueIncluded ? intColumn.isGreaterThanOrEqualTo(lowValue) : intColumn.isGreaterThan(lowValue)).
-					where(intColumn.isLessThan(highValue)); 	// where(rightValueIncluded ? intColumn.isLessThanOrEqualTo(highValue) : intColumn.isLessThan(highValue));
+			dataFiltered = data.where(intColumn.isBetweenInclusive(lowValue,highValue));
 		} else if (data.column(featureName).type()==ColumnType.DOUBLE) {
 			DoubleColumn doubleColumn = data.doubleColumn(featureName);
-			dataFiltered = data.
-					where(leftValueIncluded ? doubleColumn.isGreaterThanOrEqualTo(lowValue) : doubleColumn.isGreaterThan(lowValue)).
-					where(doubleColumn.isLessThan(highValue)); // where(rightValueIncluded ? doubleColumn.isLessThanOrEqualTo(highValue) : doubleColumn.isLessThan(highValue));
+			dataFiltered = data.where(doubleColumn.isBetweenInclusive(lowValue,highValue));
 		}
 		return dataFiltered;
 	}
@@ -122,17 +119,31 @@ public class OneR {
 		return f;
 	}
 
-	public static Frequency getFrequencyHighCoverageLowError(List<FrequencyTable> freuencyTables) {
+	public static Frequency getFrequencyHighCoverageLowError(List<FrequencyTable> frequencyTables) {
 
-		Frequency f = freuencyTables.get(0).selectFrequencyHighCoverageLowError();
+		Frequency f = frequencyTables.get(0).selectFrequencyHighCoverageLowError();
 
-		for (int i=1; i<freuencyTables.size(); i++) {
-			if (freuencyTables.get(i).selectFrequencyHighCoverageLowError().getBestFrequencyAssessment() > f.getBestFrequencyAssessment()) {
-				f = freuencyTables.get(i).selectFrequencyHighCoverageLowError();
+		for (int i=1; i<frequencyTables.size(); i++) {
+			if (frequencyTables.get(i).selectFrequencyHighCoverageLowError().getBestFrequencyAssessment() > f.getBestFrequencyAssessment()) {
+				f = frequencyTables.get(i).selectFrequencyHighCoverageLowError();
 			}
 		}
 		return f;
 	}
 
+	public static Frequency getFrequencyHighCoverageLowError(List<FrequencyTable> frequencyTables, ColumnType featureType) {
+
+		List<FrequencyTable> frequencyTablesByType= frequencyTables.stream().filter(ft -> ft.getFeatureType().equals(featureType)).collect(Collectors.toList());
+
+		if (!frequencyTablesByType.isEmpty()){
+			Frequency f = frequencyTablesByType.get(0).selectFrequencyHighCoverageLowError();
+			for (int i=1; i<frequencyTablesByType.size(); i++) {
+				if (frequencyTablesByType.get(i).selectFrequencyHighCoverageLowError().getBestFrequencyAssessment() > f.getBestFrequencyAssessment()) {
+					f = frequencyTablesByType.get(i).selectFrequencyHighCoverageLowError();
+				}
+			}
+			return f;
+		}else {return null;}
+	}
 
 }

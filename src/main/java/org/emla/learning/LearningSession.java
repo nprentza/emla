@@ -7,6 +7,7 @@ import org.emla.learning.oner.FrequencyTable;
 import org.emla.learning.oner.OneR;
 import org.emla.learning.trees.DecisionTreeBasics;
 import org.emla.learning.trees.FeatureSplit;
+import tech.tablesaw.api.ColumnType;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -47,6 +48,10 @@ public class LearningSession {
 
 	public Frequency calculateFrequencyHighCoverageLowError(List<FrequencyTable> frequencyTables) {
 		return OneR.getFrequencyHighCoverageLowError(frequencyTables);
+	}
+
+	public Frequency calculateFrequencyHighCoverageLowError(List<FrequencyTable> frequencyTables, ColumnType featureType) {
+		return OneR.getFrequencyHighCoverageLowError(frequencyTables, featureType);
 	}
 
 	/*

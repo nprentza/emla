@@ -77,7 +77,8 @@ private static final Logger logger = LogManager.getLogger(DbAccess.class);
 	
 	public static FrequencyTable getFrequencies(String predictor, String targetVariable, List<String> targetValues, String tblName,
 												String datasplit, List<Integer> caseIDs){
-		FrequencyTable freqTable = new FrequencyTable(predictor, targetValues);
+		//	ColumnType is set to STRING assuming that DbAccess.getFrequencies is called only for categorical features
+		FrequencyTable freqTable = new FrequencyTable(predictor, ColumnType.STRING, targetValues);
 
 		String inSql=null;
 		if (caseIDs!=null){

@@ -50,7 +50,7 @@ public class FrequencyTable {
 	}
 	
 	public String toString() {
-		String str = "\nFrequency Table for predictor '" + this.predictor + "':\n";
+		String str = "\n** Frequency Table for predictor '" + this.predictor + "':\n";
 		for (Frequency f : frequencies) {
 			str += f.toString();
 		}

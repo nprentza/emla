@@ -100,19 +100,20 @@ private static final Logger logger = LogManager.getLogger(DbAccess.class);
 			ResultSet rs = stmt.executeQuery(sqlString);
 			if (rs.next()) {
 				f = new Frequency(predictor, LearningUtils.Operator.EQUALS, rs.getString(1)); tmpPredictorValue=rs.getString(1);
-				f.addFrequency(rs.getString(2), rs.getInt(3));
+				f = addFrequency(f,rs.getString(2), rs.getInt(3)); // f.addFrequency(rs.getString(2), rs.getInt(3));
 				while (rs.next()) {
 					if (!rs.getString(1).equals(tmpPredictorValue)) {
 						freqTable.addFrequency(f);
 						f = new Frequency(predictor, LearningUtils.Operator.EQUALS, rs.getString(1));
 						tmpPredictorValue = rs.getString(1);
 					}
-					f.addFrequency(rs.getString(2), rs.getInt(3));
+					f = addFrequency(f,rs.getString(2), rs.getInt(3)); // f.addFrequency(rs.getString(2), rs.getInt(3));
 				}
+				freqTable.addFrequency(f);
 				// case rs contains a single recordset:
-				if (freqTable.isFrequenciesEmpty()){
-					freqTable.addFrequency(f);
-				}
+				//if (freqTable.isFrequenciesEmpty()){
+				//		freqTable.addFrequency(f);
+				//}
 			}
 			stmt.close();
 		} catch (SQLException e) {
@@ -122,7 +123,13 @@ private static final Logger logger = LogManager.getLogger(DbAccess.class);
 		}
 		
 		return freqTable;
-		
+	}
+
+	private static Frequency addFrequency(Frequency f, String targetValue, int instances){
+		if (instances>0){
+			f.addFrequency(targetValue,instances);
+		}
+		return f;
 	}
 	
 	/*

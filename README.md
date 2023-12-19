@@ -14,7 +14,7 @@ At the moment, the repo includes the `oner` library that learns single condition
     <dependency>
         <groupId>org.emla</groupId>
         <artifactId>emla</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.2-SNAPSHOT</version>
     </dependency>
 ```
 

@@ -1,0 +1,13 @@
+user,restrictions,consent,grantaccess
+admin,yes,yes,no
+admin,yes,no,no
+admin,no,yes,no
+admin,no,no,no
+patient,yes,yes,yes
+patient,yes,no,yes
+patient,no,yes,yes
+patient,no,no,yes
+doctor,yes,yes,yes
+doctor,yes,no,no
+doctor,no,yes,yes
+doctor,no,no,yes

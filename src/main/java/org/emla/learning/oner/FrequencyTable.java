@@ -3,7 +3,9 @@ package org.emla.learning.oner;
 import tech.tablesaw.api.ColumnType;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FrequencyTable {
 
@@ -37,7 +39,15 @@ public class FrequencyTable {
 
 	//	select Frequency with high coverage and low error
 	public Frequency selectFrequencyHighCoverageLowError() {
-		
+
+		// sort frequencies by assessment, highest first
+		if (frequencies.size()>0){
+			frequencies.sort(Comparator.comparing(Frequency::getBestFrequencyAssessment).reversed());
+			return frequencies.get(0);
+		}else{
+			return null;
+		}
+		/*
 		Frequency f = frequencies.get(0);
 		
 		for (int i=1; i < frequencies.size(); i++) {
@@ -46,11 +56,31 @@ public class FrequencyTable {
 			}
 		}
 		return f;
-		
+		*/
+	}
+
+	//	select Frequency with high coverage and low error for a particular target-class
+	public Frequency selectFrequencyHighCoverageLowError(String targetClass) {
+
+		List<Frequency> freqsForTargetClass = frequencies.stream().filter(fr -> fr.getMajorityTargetClass().equals(targetClass)).collect(Collectors.toList());
+		if (freqsForTargetClass.isEmpty()){
+			return null;
+		}else{
+			freqsForTargetClass.sort(Comparator.comparing(Frequency::getBestFrequencyAssessment).reversed());
+			return freqsForTargetClass.get(0);
+			/*Frequency f = freqsForTargetClass.get(0);
+			for (int i=1; i < freqsForTargetClass.size(); i++) {
+				if (freqsForTargetClass.get(i).getBestFrequencyAssessment() > f.getBestFrequencyAssessment()) {
+					f= freqsForTargetClass.get(i);
+				}
+			}
+			return f;*/
+		}
 	}
 	
 	public String toString() {
 		String str = "\n** Frequency Table for predictor '" + this.predictor + "':\n";
+		frequencies.sort(Comparator.comparing(Frequency::getBestFrequencyAssessment).reversed());
 		for (Frequency f : frequencies) {
 			str += f.toString();
 		}

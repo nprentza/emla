@@ -19,20 +19,19 @@ public class Frequency {
 
 	String featureName;
 	List<Pair<LearningUtils.Operator, Object>> operatorValue;   // i.e. (==, "sunny") or {(>=,30),(<50)}
-
-	//Pair<String,Object> predictorValue;	//	i.e. (outlook, sunny)
 	double coverage;
 	Map<String, Integer> dataPointsByClass;	//	for each target value (i.e. play-golf {yes,no}), the number of instances that satisfy this condition
+	String caseIDs;	// list of caseIDs supported by frequency
 	String majorityTargetClass;
 	double majorityTargetClassError;
 	double bestFrequencyAssessment;
 
-	public Frequency(String featureName, LearningUtils.Operator operator, String value) {
-		//predictorValue = Pair.of(predictor,value);
+	public Frequency(String featureName, LearningUtils.Operator operator, String value, String caseIDs) {
 		this.featureName = featureName;
 		this.operatorValue = new ArrayList<>();
 		this.dataPointsByClass = new HashMap<>();
 		this.addOperatorValue(operator,value);
+		this.caseIDs = caseIDs;
 	}
 
 	public Frequency(String featureName){
@@ -59,9 +58,7 @@ public class Frequency {
 
 	public String getMajorityTargetClass(){return this.majorityTargetClass;}
 
-	/*public Pair<String,Object> getPredictorValues(){
-		return this.predictorValue;
-	}*/
+	public String getCaseIDs(){return this.caseIDs;}
 
 	private void setCoverage(int allInstances) {
 		this.coverage = (double) dataPointsByClass.values().stream().mapToInt(d-> d).sum() /(double) allInstances;
@@ -88,7 +85,8 @@ public class Frequency {
 		//	set bestTargetError
 		int allOtherInstances = dataPointsByClass.entrySet().stream().filter(entry -> !entry.getKey().equals(majorityTargetClass)).mapToInt(entry -> entry.getValue()).sum();
 		majorityTargetClassError = (double) allOtherInstances / dataPointsByClass.values().stream().mapToInt(d-> d).sum();
-		bestFrequencyAssessment = this.coverage * (1-majorityTargetClassError);
+		//	desired properties : high coverage, low error (high accuracy)
+		bestFrequencyAssessment =  this.coverage * (1 - majorityTargetClassError);
 	}
 
 	public double getBestFrequencyAssessment() {return this.bestFrequencyAssessment;}
@@ -96,8 +94,10 @@ public class Frequency {
 	public String toString() {
 		
 		String str="\n>> " + this.getFrequencyConditions().stream().collect(Collectors.joining(", ")) //+ featureName + predictorValuesToString()
-				+ " (Coverage= " + LearningSession.df.format(coverage)  + " ) "
-		+ " (Best target value = " + this.majorityTargetClass + ", with error=" +  LearningSession.df.format(this.majorityTargetClassError) +  " ) " + " ) :\n";
+				+ " (target=" + this.majorityTargetClass + "), (coverage=" + LearningSession.df.format(coverage)
+					+ ", accuracy=" + LearningSession.df.format(1-this.majorityTargetClassError)
+					+ ", assessment=" + LearningSession.df.format(this.bestFrequencyAssessment) + ") "
+					+ "(caseIDs= " + this.caseIDs + ")" + ":\n";
 
 		for (Entry<String, Integer> entry : dataPointsByClass.entrySet()) {
 			str += "	[" + entry.getKey() + ", " + entry.getValue() + "]";

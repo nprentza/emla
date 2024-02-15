@@ -1,6 +1,8 @@
 package org.emla.learning.oner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.emla.dbcomponent.Dataset;
 import org.emla.dbcomponent.DbAccess;
+import org.emla.learning.LearningSession;
 import org.emla.learning.LearningUtils;
 import tech.tablesaw.api.ColumnType;
 import tech.tablesaw.api.DoubleColumn;
@@ -15,6 +18,48 @@ import tech.tablesaw.api.IntColumn;
 import tech.tablesaw.api.Table;
 
 public class OneR {
+
+	//	Sequential Covering
+	public static List<Frequency> sequentialCovering(Dataset ds, String dataSplit){
+		LearningSession emlaSession = new LearningSession(ds,"test");
+		List<Frequency> rules = new ArrayList<>();
+		List<Integer> allCaseIDs = ds.getCaseIDs(dataSplit);
+		int run=1;
+
+		//	first run
+		List<FrequencyTable> frequencyTables = emlaSession.calculateFrequencyTables(ds, dataSplit,null);
+		ds.getUniqueTargetValues().forEach(target -> rules.add(emlaSession.calculateFrequencyHighCoverageLowError(frequencyTables, target)));
+		rules.removeAll(Collections.singleton(null));
+
+		List<Integer> caseIDsCovered = Arrays.stream(rules.stream().map(rule -> rule.getCaseIDs())
+						.collect(Collectors.joining(",")).split(","))
+				.filter(id -> !id.equals("null"))
+				.map(id -> Integer.valueOf(id)).collect(Collectors.toList());
+
+		List<Integer> caseIDsNotCovered = allCaseIDs; caseIDsNotCovered.removeAll(caseIDsCovered);
+
+		System.out.println("run " + run + "\ncaseIDs covered: " + caseIDsCovered.toString());
+		System.out.println("caseIDs not covered: " + caseIDsNotCovered.toString());
+
+		while (caseIDsNotCovered.size()>0){
+			run++;
+			List<FrequencyTable> frequencyTablesR = emlaSession.calculateFrequencyTables(ds, dataSplit,caseIDsNotCovered);
+			ds.getUniqueTargetValues().forEach(target -> rules.add(emlaSession.calculateFrequencyHighCoverageLowError(frequencyTablesR, target)));
+			rules.removeAll(Collections.singleton(null));
+			caseIDsCovered = Arrays.stream(rules.stream().map(rule -> rule.getCaseIDs())
+							.collect(Collectors.joining(",")).split(","))
+					.filter(id -> !id.equals("null"))
+					.map(id -> Integer.valueOf(id)).collect(Collectors.toList());
+			List<Integer> caseIDsNotCovered_Before = caseIDsNotCovered;
+			caseIDsNotCovered = allCaseIDs;	caseIDsNotCovered.removeAll(caseIDsCovered);
+			System.out.println("run " + run + "\ncaseIDs covered: " + caseIDsCovered.toString());
+			System.out.println("caseIDs not covered: " + caseIDsNotCovered.toString());
+			//	if there is no improvemet on the  coverage, exit while look
+			if (caseIDsNotCovered.equals(caseIDsNotCovered_Before)){break;}
+		}
+
+		return rules;
+	}
 
 	public static List<FrequencyTable> getFrequencyTables(Dataset ds, String dataSplit, List<Integer> caseIDs){
 		List<FrequencyTable> freuencyTables = new ArrayList<>();
@@ -129,6 +174,22 @@ public class OneR {
 			}
 		}
 		return f;
+	}
+
+	public static Frequency getFrequencyHighCoverageLowError(List<FrequencyTable> frequencyTables, String targetClass) {
+
+		List<Frequency> freqsTargetClass = new ArrayList<>();
+
+		frequencyTables.forEach( ft -> {
+			Frequency f = ft.selectFrequencyHighCoverageLowError(targetClass);
+			if (f!=null){freqsTargetClass.add(f);}
+		});
+
+		if (!freqsTargetClass.isEmpty()){
+			return freqsTargetClass.stream().sorted(Comparator.comparingDouble(Frequency::getBestFrequencyAssessment)).collect(Collectors.toList()).get(0);
+		}else {
+			return null;
+		}
 	}
 
 	public static Frequency getFrequencyHighCoverageLowError(List<FrequencyTable> frequencyTables, ColumnType featureType) {

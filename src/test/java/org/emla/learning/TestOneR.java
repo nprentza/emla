@@ -1,27 +1,35 @@
 package org.emla.learning;
 
+import org.emla.dbcomponent.Dataset;
+import org.emla.learning.oner.Frequency;
+import org.emla.learning.oner.FrequencyTable;
+import org.emla.learning.oner.OneR;
+import org.junit.jupiter.api.Test;
+import tech.tablesaw.api.ColumnType;
+
 import java.util.Arrays;
 import java.util.List;
 
-import org.emla.learning.oner.Frequency;
-import org.emla.learning.oner.FrequencyTable;
-import org.junit.jupiter.api.Test;
-
-import org.emla.dbcomponent.Dataset;
-import tech.tablesaw.api.ColumnType;
-
 public class TestOneR {
 
-	
+	@Test
+	public void testSequentialCovering(){
+		Dataset ds = new Dataset("./src/test/resources/dataAccessPolicy.csv", "dataacess", "grantaccess", 1, 0);
+		List<Frequency> rules = OneR.sequentialCovering(ds,"train");
+
+		System.out.println("\n\n List of frequencies (rules) selected:");
+		rules.forEach(r -> System.out.println(r.toString()));
+	}
+
 	@Test
 	public void testLoadDataset() {
 		
 		Dataset ds = new Dataset("./src/test/resources/playtennis.csv", "playtennis", "play", 1, 0);
 		LearningSession emlaSession = new LearningSession(ds,"test");
 		List<FrequencyTable> frequencyTables = emlaSession.calculateFrequencyTables(ds, "train",null);
-		
+
 		frequencyTables.forEach(f -> System.out.println(f.toString()));
-		
+
 		System.out.println("\n\n ** BEST FREQUENCY ** ");
 		Frequency f = emlaSession.calculateFrequencyHighCoverageLowError(ds, "train");
 		System.out.println(f.toString() + "\n*************************************************************************************");
@@ -41,7 +49,7 @@ public class TestOneR {
 
 	@Test
 	public void testNumericalFeatures() {
-		Dataset ds = new Dataset("./src/test/resources/agentRequests3.csv", "agents", "access", 1, 0);
+		Dataset ds = new Dataset("./src/test/resources/agentRequests.csv", "agents", "access", 1, 0);
 		LearningSession emlaSession = new LearningSession(ds,"agents");
 		List<FrequencyTable> frequencyTables = emlaSession.calculateFrequencyTables(ds, "train",null);
 		frequencyTables.forEach(ft -> System.out.println(ft.toString()));

@@ -50,6 +50,10 @@ public class LearningSession {
 		return OneR.getFrequencyHighCoverageLowError(frequencyTables);
 	}
 
+	public Frequency calculateFrequencyHighCoverageLowError(List<FrequencyTable> frequencyTables, String targetClass) {
+		return OneR.getFrequencyHighCoverageLowError(frequencyTables,targetClass);
+	}
+
 	public Frequency calculateFrequencyHighCoverageLowError(List<FrequencyTable> frequencyTables, ColumnType featureType) {
 		return OneR.getFrequencyHighCoverageLowError(frequencyTables, featureType);
 	}

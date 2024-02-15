@@ -89,7 +89,7 @@ private static final Logger logger = LogManager.getLogger(DbAccess.class);
 			inSql = inSql.substring(0, inSql.length()-1) + ")";
 		}
 		
-		String sqlString = "SELECT " + predictor + ", " + targetVariable + ", count(*) as instances FROM " + tblName 
+		String sqlString = "SELECT " + predictor + ", " + targetVariable + ", count(*) as instances, GROUP_CONCAT(caseID) as caseIDs FROM " + tblName
 				+ " WHERE datasplit='" + datasplit + "'" + (inSql!=null ? " AND " + inSql : "")
 				+ " GROUP BY " + predictor + ", " + targetVariable 
 				+ " ORDER BY " + predictor + ";";
@@ -99,12 +99,13 @@ private static final Logger logger = LogManager.getLogger(DbAccess.class);
 			Statement stmt=conn.createStatement();
 			ResultSet rs = stmt.executeQuery(sqlString);
 			if (rs.next()) {
-				f = new Frequency(predictor, LearningUtils.Operator.EQUALS, rs.getString(1)); tmpPredictorValue=rs.getString(1);
+				f = new Frequency(predictor, LearningUtils.Operator.EQUALS, rs.getString(1), rs.getString(4));
+				tmpPredictorValue=rs.getString(1);
 				f = addFrequency(f,rs.getString(2), rs.getInt(3)); // f.addFrequency(rs.getString(2), rs.getInt(3));
 				while (rs.next()) {
 					if (!rs.getString(1).equals(tmpPredictorValue)) {
 						freqTable.addFrequency(f);
-						f = new Frequency(predictor, LearningUtils.Operator.EQUALS, rs.getString(1));
+						f = new Frequency(predictor, LearningUtils.Operator.EQUALS, rs.getString(1), rs.getString(4));
 						tmpPredictorValue = rs.getString(1);
 					}
 					f = addFrequency(f,rs.getString(2), rs.getInt(3)); // f.addFrequency(rs.getString(2), rs.getInt(3));
@@ -147,31 +148,4 @@ private static final Logger logger = LogManager.getLogger(DbAccess.class);
 		
 		return sqlType;
 	}
-
-	private static Frequency getFrequency(String sqlString, String predictor, String predictorValue) throws SQLException{
-		
-		Frequency f = new Frequency(predictor, LearningUtils.Operator.EQUALS, predictorValue);
-		
-		Statement stmt=conn.createStatement();
-		ResultSet rs = stmt.executeQuery(sqlString);
-		while (rs.next()) {
-			f.addFrequency(rs.getString(1), rs.getInt(2));
-		}
-		
-		stmt.close();
-		return f;
-		
-	}
-	
-	/*
-	 * 	public FeatureValueTarget(String attrName, Object attrValue, Object targetValue, double coverage, 
-			int attrValueTargetCases, double accuracy, String caseIDs) {
-		this.attrName = attrName;
-		this.attrValue = attrValue;
-		this.targetValue = targetValue;
-		this.coverage = coverage;
-		this.accuracy = accuracy;
-		this.caseIDs = caseIDs;
-	}
-	 */
 }

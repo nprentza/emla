@@ -229,6 +229,10 @@ public abstract class DatasetAbstract {
 		return (List<String>) dsTable.column(targetFeature).asList().
 				stream().distinct().collect(Collectors.toList());
 	}
+
+	public List<Integer> getCaseIDs(String dataSplit){
+		return (List<Integer>) getDataSplit(dataSplit).column("caseID").asList().stream().collect(Collectors.toList());
+	}
 	
 	// add caseID
 	private void preprocessing() {

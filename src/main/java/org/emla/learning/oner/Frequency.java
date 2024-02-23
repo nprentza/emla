@@ -26,7 +26,7 @@ public class Frequency {
 	double majorityTargetClassError;
 	double bestFrequencyAssessment;
 
-	public Frequency(String featureName, LearningUtils.Operator operator, String value, String caseIDs) {
+	public Frequency(String featureName, LearningUtils.Operator operator, Object value, String caseIDs) {
 		this.featureName = featureName;
 		this.operatorValue = new ArrayList<>();
 		this.dataPointsByClass = new HashMap<>();
@@ -118,6 +118,21 @@ public class Frequency {
 		// condition += condition.length()==0 ?  predictorValue.getLeft() + "=" + predictorValue.getRight() :  "," + predictorValue.getLeft() + "=" + predictorValue.getRight();
 
 		return condition;
-			
+	}
+
+	/*  */
+	public static class FrequencyCondition {
+
+		LearningUtils.Operator operator;
+		Object value;
+
+		public FrequencyCondition(LearningUtils.Operator op, Object val){
+			this.operator = op;
+			this.value = val;
+		}
+
+		public Pair<LearningUtils.Operator, Object> pairOf(){
+			return Pair.of(operator,value);
+		}
 	}
 }

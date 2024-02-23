@@ -1,9 +1,12 @@
 package org.emla.learning;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.emla.learning.oner.Frequency;
 import tech.tablesaw.api.ColumnType;
 import tech.tablesaw.api.Table;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +97,26 @@ public class LearningUtils {
                 }
             }
         }
-        return splits;
+        return splits.stream().distinct().collect(Collectors.toList());
+    }
+
+    public static List<Pair<Frequency.FrequencyCondition, Frequency.FrequencyCondition>> splitPointsToConditions(List<Double> splitPoints){
+        List<Pair<Frequency.FrequencyCondition, Frequency.FrequencyCondition>> conditions = new ArrayList<>();
+        Arrays.sort(splitPoints.toArray());
+
+        if (splitPoints.size()>0){
+            conditions.add(Pair.of(null,new Frequency.FrequencyCondition(Operator.LESS_THAN,splitPoints.get(0))));
+            if (splitPoints.size()>1){
+                for (int i=1; i<splitPoints.size(); i++){
+                    Frequency.FrequencyCondition left = new Frequency.FrequencyCondition(Operator.GREATER_OR_EQUAL,splitPoints.get(i-1));
+                    Frequency.FrequencyCondition right = new Frequency.FrequencyCondition(Operator.LESS_THAN,splitPoints.get(i));
+                    conditions.add(Pair.of(left,right));
+                }
+                conditions.add(Pair.of(new Frequency.FrequencyCondition(Operator.GREATER_OR_EQUAL,splitPoints.get(splitPoints.size()-1)),null));
+            }
+        }
+
+        return conditions;
     }
 
     public static Map<String, Integer> getDataPointsByClass(Table data, String targetFeatureName, List<String> targetValues){

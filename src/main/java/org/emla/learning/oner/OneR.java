@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.emla.dbcomponent.Dataset;
 import org.emla.dbcomponent.DbAccess;
 import org.emla.learning.LearningSession;
@@ -88,39 +89,17 @@ public class OneR {
 		Table data = dataSplit!=null ? dsFiltered.getDataSplit(dataSplit) : dsFiltered.getDsTable();
 		data = data.sortAscendingOn(featureName);
 		List<Double> splitPoints = LearningUtils.numericalSplitPoints(data,featureName,ds.getTargetFeature());
+		List<Pair<Frequency.FrequencyCondition, Frequency.FrequencyCondition>> splitPointsCondtions = LearningUtils.splitPointsToConditions(splitPoints);
 		FrequencyTable freqTable = new FrequencyTable(featureName, ds.getDsTable().column(featureName).type(), ds.getUniqueTargetValues());
-		 /*
-            for each split point i:
-                calculate frequencies for the range [split-point(i-1), split-point(i))
-         */
-		double lowValue, highValue;
+
 		Table dataSelection = null;
-		if (splitPoints.size()==0){	// all datapoints of the same class
-			lowValue = data.row(0).getNumber(featureName);
-			highValue = data.row(data.rowCount()-1).getNumber(featureName);
-			dataSelection  = filterSelection(data, featureName, lowValue, highValue,true,true);
-			freqTable.addFrequency(numericalFrequency(featureName,
-					LearningUtils.getDataPointsByClass(dataSelection,ds.getTargetFeature(),ds.getUniqueTargetValues()),
-					lowValue, highValue,LearningUtils.Operator.GREATER_OR_EQUAL, LearningUtils.Operator.LESS_OR_EQUAL,data.rowCount()));
-		}else {
-			// calculate frequency for ranges
-			// 		[splitPoint(0),splitPoint(1)), [splitPoint(1),splitPoint(2)), .., [splitPoint(N-2),splitPoint(N-1)]
-			lowValue = data.row(0).getNumber(featureName);
-			for (int i=0; i<splitPoints.size();i++){
-				highValue = splitPoints.get(i);
-				dataSelection  = filterSelection(data, featureName, lowValue, highValue,
-						true, false);
+		for (Pair<Frequency.FrequencyCondition, Frequency.FrequencyCondition> conditionPair : splitPointsCondtions){
+			dataSelection = filterSelection(data,featureName,conditionPair);
+			if (dataSelection.rowCount()>0) {
 				freqTable.addFrequency(numericalFrequency(featureName,
-						LearningUtils.getDataPointsByClass(dataSelection,ds.getTargetFeature(),ds.getUniqueTargetValues()),
-						lowValue, highValue, LearningUtils.Operator.GREATER_OR_EQUAL, LearningUtils.Operator.LESS_THAN, data.rowCount()));
-				lowValue = splitPoints.get(i);
+						LearningUtils.getDataPointsByClass(dataSelection, ds.getTargetFeature(), ds.getUniqueTargetValues()),
+						conditionPair, data.rowCount()));
 			}
-			//	calculate frequency for last split
-			highValue = data.row(data.rowCount()-1).getNumber(featureName);
-			dataSelection  = filterSelection(data, featureName, lowValue, highValue, true,true);
-			freqTable.addFrequency(numericalFrequency(featureName,
-					LearningUtils.getDataPointsByClass(dataSelection,ds.getTargetFeature(),ds.getUniqueTargetValues()),
-					lowValue, highValue, LearningUtils.Operator.GREATER_OR_EQUAL, LearningUtils.Operator.LESS_OR_EQUAL,data.rowCount()));
 		}
 		return freqTable;
 	}
@@ -139,6 +118,36 @@ public class OneR {
 		return dataFiltered;
 	}
 
+	private static Table filterSelection(Table data, String featureName, Pair<Frequency.FrequencyCondition,Frequency.FrequencyCondition> condition){
+		Table datafiltered = null;
+
+		if (condition.getLeft()!=null){
+			datafiltered = singleFilterSelection(data,featureName, condition.getLeft());
+		}
+
+		if (condition.getRight()!=null){
+			datafiltered = singleFilterSelection(datafiltered==null? data : datafiltered,
+					featureName, condition.getRight());
+		}
+
+		return datafiltered;
+	}
+
+	//	assumption: condition.operator is either LESS_THAN or GREATER_OR_EQUAL_THAN
+	private static Table singleFilterSelection(Table data, String featureName, Frequency.FrequencyCondition condition){
+		if (data.column(featureName).type()==ColumnType.INTEGER){
+			IntColumn intColumn = data.intColumn(featureName);
+			return condition.operator== LearningUtils.Operator.LESS_THAN ? data.where(intColumn.isLessThan((double)condition.value))
+					: data.where(intColumn.isGreaterThanOrEqualTo((double)condition.value));
+		}else if (data.column(featureName).type()==ColumnType.DOUBLE){
+			DoubleColumn doubleColumn = data.doubleColumn(featureName);
+			return condition.operator== LearningUtils.Operator.LESS_THAN ? data.where(doubleColumn.isLessThan((double)condition.value))
+					: data.where(doubleColumn.isGreaterThanOrEqualTo((double)condition.value));
+		}else{
+			return null;	// column type is not supported
+		}
+	}
+
 	private static Frequency numericalFrequency(String featureName, Map<String, Integer> dataPointsByClass, double splitPointLow, double splitPointHigh,
 												LearningUtils.Operator leftOperator, LearningUtils.Operator rightOperator, int dataSize){
 		Frequency f = new Frequency(featureName);
@@ -148,7 +157,21 @@ public class OneR {
 		f.updateFrequency(dataSize);
 		return f;
 	}
-	
+
+	private static Frequency numericalFrequency(String featureName, Map<String, Integer> dataPointsByClass,
+												Pair<Frequency.FrequencyCondition, Frequency.FrequencyCondition> condition, int dataSize){
+		Frequency f = new Frequency(featureName);
+		if (condition.getLeft()!=null) {
+			f.addOperatorValue(condition.getLeft().operator, condition.getLeft().value);
+		}
+		if (condition.getRight()!=null) {
+			f.addOperatorValue(condition.getRight().operator, condition.getRight().value);
+		}
+		dataPointsByClass.entrySet().forEach( e -> f.addFrequency(e.getKey(),e.getValue()));
+		f.updateFrequency(dataSize);
+		return f;
+	}
+
 	public static Frequency getFrequencyHighCoverageLowError(Dataset ds, String dataSplit) {
 		
 		List<FrequencyTable> freuencyTables = getFrequencyTables(ds, dataSplit, null);
@@ -205,6 +228,13 @@ public class OneR {
 			}
 			return f;
 		}else {return null;}
+	}
+
+	public static Frequency getFrequencyHighCoverageLowError(List<FrequencyTable> frequencyTables, ColumnType featureType, String targetClass) {
+
+		List<FrequencyTable> frequencyTablesByType= frequencyTables.stream().filter(ft -> ft.getFeatureType().equals(featureType)).collect(Collectors.toList());
+		return getFrequencyHighCoverageLowError(frequencyTablesByType,targetClass);
+
 	}
 
 }

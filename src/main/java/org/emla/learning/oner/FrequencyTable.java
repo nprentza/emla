@@ -47,16 +47,6 @@ public class FrequencyTable {
 		}else{
 			return null;
 		}
-		/*
-		Frequency f = frequencies.get(0);
-		
-		for (int i=1; i < frequencies.size(); i++) {
-			if (frequencies.get(i).getBestFrequencyAssessment() > f.getBestFrequencyAssessment()) {
-				f= frequencies.get(i);
-			}
-		}
-		return f;
-		*/
 	}
 
 	//	select Frequency with high coverage and low error for a particular target-class
@@ -68,13 +58,6 @@ public class FrequencyTable {
 		}else{
 			freqsForTargetClass.sort(Comparator.comparing(Frequency::getBestFrequencyAssessment).reversed());
 			return freqsForTargetClass.get(0);
-			/*Frequency f = freqsForTargetClass.get(0);
-			for (int i=1; i < freqsForTargetClass.size(); i++) {
-				if (freqsForTargetClass.get(i).getBestFrequencyAssessment() > f.getBestFrequencyAssessment()) {
-					f= freqsForTargetClass.get(i);
-				}
-			}
-			return f;*/
 		}
 	}
 	

@@ -58,6 +58,10 @@ public class LearningSession {
 		return OneR.getFrequencyHighCoverageLowError(frequencyTables, featureType);
 	}
 
+	public Frequency calculateFrequencyHighCoverageLowError(List<FrequencyTable> frequencyTables, ColumnType featureType, String targetClass) {
+		return OneR.getFrequencyHighCoverageLowError(frequencyTables, featureType, targetClass);
+	}
+
 	/*
 		learning methods for Trees algorithms
 	 */

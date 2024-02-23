@@ -49,8 +49,10 @@ public class TestOneR {
 
 	@Test
 	public void testNumericalFeatures() {
-		Dataset ds = new Dataset("./src/test/resources/agentRequests.csv", "agents", "access", 1, 0);
-		LearningSession emlaSession = new LearningSession(ds,"agents");
+		// Dataset ds = new Dataset("./src/test/resources/agentRequests.csv", "agents", "access", 1, 0);
+		// LearningSession emlaSession = new LearningSession(ds,"agents");
+		Dataset ds = new Dataset("./src/test/resources/medical_access_1.csv", "medical", "access", 1, 0);
+		LearningSession emlaSession = new LearningSession(ds,"medical");
 		List<FrequencyTable> frequencyTables = emlaSession.calculateFrequencyTables(ds, "train",null);
 		frequencyTables.forEach(ft -> System.out.println(ft.toString()));
 

@@ -1,5 +1,14 @@
 package org.emla.learning.oner;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.emla.dbcomponent.Dataset;
+import org.emla.dbcomponent.DbAccess;
+import org.emla.learning.LearningSession;
+import org.emla.learning.LearningUtils;
+import tech.tablesaw.api.ColumnType;
+import tech.tablesaw.api.NumberColumn;
+import tech.tablesaw.api.Table;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,16 +16,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.emla.dbcomponent.Dataset;
-import org.emla.dbcomponent.DbAccess;
-import org.emla.learning.LearningSession;
-import org.emla.learning.LearningUtils;
-import tech.tablesaw.api.ColumnType;
-import tech.tablesaw.api.DoubleColumn;
-import tech.tablesaw.api.IntColumn;
-import tech.tablesaw.api.Table;
 
 public class OneR {
 
@@ -89,7 +88,10 @@ public class OneR {
 		Table data = dataSplit!=null ? dsFiltered.getDataSplit(dataSplit) : dsFiltered.getDsTable();
 		data = data.sortAscendingOn(featureName);
 		List<Double> splitPoints = LearningUtils.numericalSplitPoints(data,featureName,ds.getTargetFeature());
-		List<Pair<Frequency.FrequencyCondition, Frequency.FrequencyCondition>> splitPointsCondtions = LearningUtils.splitPointsToConditions(splitPoints);
+		List<Pair<Frequency.FrequencyCondition, Frequency.FrequencyCondition>> splitPointsCondtions = (splitPoints.size()>0)
+				? LearningUtils.splitPointsToConditions(splitPoints)
+				: LearningUtils.samePointsToConditions(getNumberColumnValue(data,featureName,0),getNumberColumnValue(data,featureName,data.rowCount()-1));
+
 		FrequencyTable freqTable = new FrequencyTable(featureName, ds.getDsTable().column(featureName).type(), ds.getUniqueTargetValues());
 
 		Table dataSelection = null;
@@ -98,24 +100,21 @@ public class OneR {
 			if (dataSelection.rowCount()>0) {
 				freqTable.addFrequency(numericalFrequency(featureName,
 						LearningUtils.getDataPointsByClass(dataSelection, ds.getTargetFeature(), ds.getUniqueTargetValues()),
-						conditionPair, data.rowCount()));
+						conditionPair, data.rowCount(), caseIDs));
 			}
 		}
+		freqTable.updateFrequencies(caseIDs!=null ? caseIDs.size() : ds.getDataSplit(dataSplit).rowCount());
 		return freqTable;
 	}
 
-	private static Table filterSelection(Table data, String featureName, Double lowValue, Double highValue, boolean leftValueIncluded, boolean rightValueIncluded){
-		Table dataFiltered=null;
-		// leftValueIncluded always true
-		if (!rightValueIncluded) {highValue++;}
-		if (data.column(featureName).type()==ColumnType.INTEGER){
-			IntColumn intColumn = data.intColumn(featureName);
-			dataFiltered = data.where(intColumn.isBetweenInclusive(lowValue,highValue));
-		} else if (data.column(featureName).type()==ColumnType.DOUBLE) {
-			DoubleColumn doubleColumn = data.doubleColumn(featureName);
-			dataFiltered = data.where(doubleColumn.isBetweenInclusive(lowValue,highValue));
+	private static double getNumberColumnValue(Table table, String colName, int rowIndex){
+		if (table.column(colName).type()==ColumnType.INTEGER){
+			return (double) table.intColumn(colName).getInt(rowIndex);
+		}else if (table.column(colName).type()==ColumnType.DOUBLE){
+			return table.doubleColumn(colName).getDouble(rowIndex);
+		}else {
+			return -1;
 		}
-		return dataFiltered;
 	}
 
 	private static Table filterSelection(Table data, String featureName, Pair<Frequency.FrequencyCondition,Frequency.FrequencyCondition> condition){
@@ -136,31 +135,31 @@ public class OneR {
 	//	assumption: condition.operator is either LESS_THAN or GREATER_OR_EQUAL_THAN
 	private static Table singleFilterSelection(Table data, String featureName, Frequency.FrequencyCondition condition){
 		if (data.column(featureName).type()==ColumnType.INTEGER){
-			IntColumn intColumn = data.intColumn(featureName);
-			return condition.operator== LearningUtils.Operator.LESS_THAN ? data.where(intColumn.isLessThan((double)condition.value))
-					: data.where(intColumn.isGreaterThanOrEqualTo((double)condition.value));
+			return numberSelection(condition.operator, data,data.intColumn(featureName), condition.value);
 		}else if (data.column(featureName).type()==ColumnType.DOUBLE){
-			DoubleColumn doubleColumn = data.doubleColumn(featureName);
-			return condition.operator== LearningUtils.Operator.LESS_THAN ? data.where(doubleColumn.isLessThan((double)condition.value))
-					: data.where(doubleColumn.isGreaterThanOrEqualTo((double)condition.value));
+			return numberSelection(condition.operator, data,data.doubleColumn(featureName), condition.value);
 		}else{
 			return null;	// column type is not supported
 		}
 	}
 
-	private static Frequency numericalFrequency(String featureName, Map<String, Integer> dataPointsByClass, double splitPointLow, double splitPointHigh,
-												LearningUtils.Operator leftOperator, LearningUtils.Operator rightOperator, int dataSize){
-		Frequency f = new Frequency(featureName);
-		f.addOperatorValue(leftOperator,splitPointLow);
-		f.addOperatorValue(rightOperator,splitPointHigh);
-		dataPointsByClass.entrySet().forEach( e -> f.addFrequency(e.getKey(),e.getValue()));
-		f.updateFrequency(dataSize);
-		return f;
+	private static Table numberSelection(LearningUtils.Operator operator, Table data, NumberColumn column, Object value){
+		switch (operator){
+			case LESS_THAN:
+				return data.where(column.isLessThan((Double)value));
+			case LESS_OR_EQUAL:
+				return data.where(column.isLessThanOrEqualTo((Double)value));
+			case GREATER_OR_EQUAL:
+				return data.where(column.isGreaterThanOrEqualTo((Double)value));
+			case GREATER_THAN:
+				return data.where(column.isGreaterThan((Double)value));
+			default: return null;
+		}
 	}
 
 	private static Frequency numericalFrequency(String featureName, Map<String, Integer> dataPointsByClass,
-												Pair<Frequency.FrequencyCondition, Frequency.FrequencyCondition> condition, int dataSize){
-		Frequency f = new Frequency(featureName);
+												Pair<Frequency.FrequencyCondition, Frequency.FrequencyCondition> condition, int dataSize, List<Integer> caseIDs){
+		Frequency f = new Frequency(featureName,caseIDs.toString());
 		if (condition.getLeft()!=null) {
 			f.addOperatorValue(condition.getLeft().operator, condition.getLeft().value);
 		}

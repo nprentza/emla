@@ -34,10 +34,11 @@ public class Frequency {
 		this.caseIDs = caseIDs;
 	}
 
-	public Frequency(String featureName){
+	public Frequency(String featureName, String caseIDs){
 		this.featureName = featureName;
 		this.operatorValue = new ArrayList<>();
 		this.dataPointsByClass = new HashMap<>();
+		this.caseIDs = caseIDs;
 	}
 
 	public void addOperatorValue(LearningUtils.Operator operator, Object value){

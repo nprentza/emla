@@ -61,4 +61,13 @@ public class TestOneR {
 			System.out.println("** fHighCovLowError_Numeric **\n    " + fHighCovLowError_Numeric.toString());
 		}
 	}
+
+	@Test
+	public void testAgentRequests(){
+		List<Integer> caseIDs = Arrays.asList(5,6);
+		Dataset ds = new Dataset("./src/test/resources/agentRequests.csv", "resourceAccess", "access", 1, 0);
+		LearningSession emlaSession = new LearningSession(ds,"resourceAccess");
+		List<FrequencyTable> frequencyTables = emlaSession.calculateFrequencyTables(ds, "train",caseIDs);
+		frequencyTables.forEach(ft -> System.out.println(ft.toString()));
+	}
 }

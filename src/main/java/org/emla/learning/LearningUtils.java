@@ -119,6 +119,17 @@ public class LearningUtils {
         return conditions;
     }
 
+    public static List<Pair<Frequency.FrequencyCondition, Frequency.FrequencyCondition>> samePointsToConditions(Double low, Double high){
+        List<Pair<Frequency.FrequencyCondition, Frequency.FrequencyCondition>> conditions = new ArrayList<>();
+        if (low==high){
+            conditions.add(Pair.of(null,new Frequency.FrequencyCondition(Operator.EQUALS,low)));
+        }else{
+            conditions.add(Pair.of(new Frequency.FrequencyCondition(Operator.GREATER_OR_EQUAL,low),
+                    new Frequency.FrequencyCondition(Operator.LESS_OR_EQUAL,high)));
+        }
+        return conditions;
+    }
+
     public static Map<String, Integer> getDataPointsByClass(Table data, String targetFeatureName, List<String> targetValues){
         Map<String, Integer> dataByClass = new HashMap<>();
 

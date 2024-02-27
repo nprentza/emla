@@ -159,7 +159,7 @@ public class OneR {
 
 	private static Frequency numericalFrequency(String featureName, Map<String, Integer> dataPointsByClass,
 												Pair<Frequency.FrequencyCondition, Frequency.FrequencyCondition> condition, int dataSize, List<Integer> caseIDs){
-		Frequency f = new Frequency(featureName,caseIDs.toString());
+		Frequency f = new Frequency(featureName,caseIDs==null ? "" : caseIDs.toString());
 		if (condition.getLeft()!=null) {
 			f.addOperatorValue(condition.getLeft().operator, condition.getLeft().value);
 		}

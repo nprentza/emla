@@ -48,26 +48,11 @@ public class TestOneR {
 	}
 
 	@Test
-	public void testNumericalFeatures() {
-		// Dataset ds = new Dataset("./src/test/resources/agentRequests.csv", "agents", "access", 1, 0);
-		// LearningSession emlaSession = new LearningSession(ds,"agents");
-		Dataset ds = new Dataset("./src/test/resources/medical_access_1.csv", "medical", "access", 1, 0);
-		LearningSession emlaSession = new LearningSession(ds,"medical");
-		List<FrequencyTable> frequencyTables = emlaSession.calculateFrequencyTables(ds, "train",null);
-		frequencyTables.forEach(ft -> System.out.println(ft.toString()));
-
-		Frequency fHighCovLowError_Numeric = emlaSession.calculateFrequencyHighCoverageLowError(frequencyTables, ColumnType.INTEGER);
-		if (fHighCovLowError_Numeric!=null){
-			System.out.println("** fHighCovLowError_Numeric **\n    " + fHighCovLowError_Numeric.toString());
-		}
-	}
-
-	@Test
 	public void testAgentRequests(){
-		List<Integer> caseIDs = Arrays.asList(5,6);
+		List<Integer> caseIDs  = Arrays.asList(5,6);
 		Dataset ds = new Dataset("./src/test/resources/agentRequests.csv", "resourceAccess", "access", 1, 0);
 		LearningSession emlaSession = new LearningSession(ds,"resourceAccess");
-		List<FrequencyTable> frequencyTables = emlaSession.calculateFrequencyTables(ds, "train",caseIDs);
+		List<FrequencyTable> frequencyTables = emlaSession.calculateFrequencyTables(ds, "train",null);
 		frequencyTables.forEach(ft -> System.out.println(ft.toString()));
 	}
 }

@@ -100,7 +100,9 @@ public class OneR {
 			if (dataSelection.rowCount()>0) {
 				freqTable.addFrequency(numericalFrequency(featureName,
 						LearningUtils.getDataPointsByClass(dataSelection, ds.getTargetFeature(), ds.getUniqueTargetValues()),
-						conditionPair, data.rowCount(), caseIDs));
+						conditionPair, data.rowCount(),
+						dataSelection.column("caseID").asList().stream()
+								.map(id->String.valueOf(id).trim()).collect(Collectors.joining(","))));
 			}
 		}
 		freqTable.updateFrequencies(caseIDs!=null ? caseIDs.size() : ds.getDataSplit(dataSplit).rowCount());
@@ -158,8 +160,8 @@ public class OneR {
 	}
 
 	private static Frequency numericalFrequency(String featureName, Map<String, Integer> dataPointsByClass,
-												Pair<Frequency.FrequencyCondition, Frequency.FrequencyCondition> condition, int dataSize, List<Integer> caseIDs){
-		Frequency f = new Frequency(featureName,caseIDs==null ? "" : caseIDs.toString());
+												Pair<Frequency.FrequencyCondition, Frequency.FrequencyCondition> condition, int dataSize, String caseIDs){
+		Frequency f = new Frequency(featureName,caseIDs);
 		if (condition.getLeft()!=null) {
 			f.addOperatorValue(condition.getLeft().operator, condition.getLeft().value);
 		}

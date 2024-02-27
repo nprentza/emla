@@ -49,7 +49,7 @@ public class TestOneR {
 
 	@Test
 	public void testAgentRequests(){
-		List<Integer> caseIDs  = Arrays.asList(5,6);
+		//List<Integer> caseIDs  = Arrays.asList(5,6);
 		Dataset ds = new Dataset("./src/test/resources/agentRequests.csv", "resourceAccess", "access", 1, 0);
 		LearningSession emlaSession = new LearningSession(ds,"resourceAccess");
 		List<FrequencyTable> frequencyTables = emlaSession.calculateFrequencyTables(ds, "train",null);

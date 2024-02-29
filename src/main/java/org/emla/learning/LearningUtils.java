@@ -105,14 +105,14 @@ public class LearningUtils {
         Arrays.sort(splitPoints.toArray());
 
         if (splitPoints.size()>0){
-            conditions.add(Pair.of(null,new Frequency.FrequencyCondition(Operator.LESS_THAN,splitPoints.get(0))));
+            conditions.add(Pair.of(null,new Frequency.FrequencyCondition(Operator.LESS_OR_EQUAL,splitPoints.get(0))));
             if (splitPoints.size()>1){
                 for (int i=1; i<splitPoints.size(); i++){
-                    Frequency.FrequencyCondition left = new Frequency.FrequencyCondition(Operator.GREATER_OR_EQUAL,splitPoints.get(i-1));
-                    Frequency.FrequencyCondition right = new Frequency.FrequencyCondition(Operator.LESS_THAN,splitPoints.get(i));
+                    Frequency.FrequencyCondition left = new Frequency.FrequencyCondition(Operator.GREATER_THAN,splitPoints.get(i-1));
+                    Frequency.FrequencyCondition right = new Frequency.FrequencyCondition(Operator.LESS_OR_EQUAL,splitPoints.get(i));
                     conditions.add(Pair.of(left,right));
                 }
-                conditions.add(Pair.of(new Frequency.FrequencyCondition(Operator.GREATER_OR_EQUAL,splitPoints.get(splitPoints.size()-1)),null));
+                conditions.add(Pair.of(new Frequency.FrequencyCondition(Operator.GREATER_THAN,splitPoints.get(splitPoints.size()-1)),null));
             }
         }
 

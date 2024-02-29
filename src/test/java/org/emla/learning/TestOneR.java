@@ -53,6 +53,10 @@ public class TestOneR {
 		Dataset ds = new Dataset("./src/test/resources/agentRequests.csv", "resourceAccess", "access", 1, 0);
 		LearningSession emlaSession = new LearningSession(ds,"resourceAccess");
 		List<FrequencyTable> frequencyTables = emlaSession.calculateFrequencyTables(ds, "train",null);
-		frequencyTables.forEach(ft -> System.out.println(ft.toString()));
+		Frequency deny = emlaSession.calculateFrequencyHighCoverageLowError(frequencyTables,"deny");
+		Frequency allow = emlaSession.calculateFrequencyHighCoverageLowError(frequencyTables,"allow");
+		System.out.println("High coverage, low error rule for 'deny' \n"+deny.toString());
+		System.out.println("High coverage, low error rule for 'allow' \n"+allow.toString());
+		//frequencyTables.forEach(ft -> System.out.println(ft.toString()));
 	}
 }

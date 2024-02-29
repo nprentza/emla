@@ -210,7 +210,8 @@ public class OneR {
 		});
 
 		if (!freqsTargetClass.isEmpty()){
-			return freqsTargetClass.stream().sorted(Comparator.comparingDouble(Frequency::getBestFrequencyAssessment)).collect(Collectors.toList()).get(0);
+			return freqsTargetClass.stream().sorted(Comparator.comparingDouble(Frequency::getBestFrequencyAssessment))
+					.collect(Collectors.toList()).get(freqsTargetClass.size()-1);
 		}else {
 			return null;
 		}
